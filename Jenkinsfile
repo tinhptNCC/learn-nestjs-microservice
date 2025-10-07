@@ -1,23 +1,14 @@
 pipeline {
-    agent any
-
-    environment {
-        NODE_VERSION = '20'
+    agent {
+        docker {
+            image 'node:20'
+        }
     }
 
     stages {
         stage('Checkout') {
             steps {
                 git branch: 'main', url: 'https://github.com/tinhptNCC/learn-nestjs-microservice'
-            }
-        }
-
-        stage('Install Node.js') {
-            steps {
-                sh '''
-                curl -fsSL https://deb.nodesource.com/setup_${NODE_VERSION}.x | bash -
-                apt-get install -y nodejs
-                '''
             }
         }
 
