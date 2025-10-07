@@ -15,7 +15,7 @@ pipeline {
         stage('Install Node.js') {
             steps {
                 sh '''
-                curl -fsSL https://deb.nodesource.com/setup_${NODE_VERSION}.x | -E bash -
+                curl -fsSL https://deb.nodesource.com/setup_${NODE_VERSION}.x | bash -
                 apt-get install -y nodejs
                 '''
             }
