@@ -1,39 +1,52 @@
 pipeline {
     agent any
+
     environment {
-        DOCKER_IMAGE = 'tinhptncc/my-nest-microservice'
-        DOCKER_TAG = "${env.BUILD_NUMBER}"
+        NODE_VERSION = '20'
     }
+
     stages {
         stage('Checkout') {
             steps {
-                git url: 'https://github.com/tinhptNCC/learn-nestjs-microservice', branch: 'main'
+                git branch: 'main', url: 'https://github.com/tinhptNCC/learn-nestjs-microservice'
             }
         }
-        stage('Build Docker Image') {
+
+        stage('Install Node.js') {
             steps {
-                script {
-                    docker.build("${DOCKER_IMAGE}:${DOCKER_TAG}")
-                }
+                sh '''
+                curl -fsSL https://deb.nodesource.com/setup_${NODE_VERSION}.x | sudo -E bash -
+                sudo apt-get install -y nodejs
+                '''
             }
         }
-        stage('Push Docker Image') {
+
+        stage('Install dependencies') {
             steps {
-                script {
-                    docker.withRegistry('https://registry.hub.docker.com', 'docker-hub-credentials') {
-                        docker.image("${DOCKER_IMAGE}:${DOCKER_TAG}").push()
-                        docker.image("${DOCKER_IMAGE}:${DOCKER_TAG}").push('latest')
-                    }
-                }
+                sh 'npm install'
             }
         }
+
+        stage('Lint & Test') {
+            steps {
+                sh 'npm run lint'
+                sh 'npm run test -- --watch=false'
+            }
+        }
+
+        stage('Build') {
+            steps {
+                sh 'npm run build'
+            }
+        }
+
         stage('Deploy') {
             steps {
                 sh '''
-                docker stop my-nest-container || true
-                docker rm my-nest-container || true
-                docker pull ${DOCKER_IMAGE}:${DOCKER_TAG}
-                docker run -d --name my-nest-container -p 3001:3001 ${DOCKER_IMAGE}:${DOCKER_TAG}
+                docker build -t demo-nest:latest .
+                docker stop demo-nest || true
+                docker rm demo-nest || true
+                docker run -d -p 3000:3000 --name demo-nest demo-nest:latest
                 '''
             }
         }
