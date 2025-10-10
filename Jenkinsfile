@@ -22,9 +22,10 @@ pipeline {
 
     stage('Build') {
       steps {
-        sh 'npm run build'
+        nodejs(nodeJSInstallationName: 'NodeJS 18') {
+          sh 'npm run build'
+        }
       }
-    }
 
     stage('Deploy') {
       steps {
