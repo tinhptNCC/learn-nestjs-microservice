@@ -1,50 +1,48 @@
 pipeline {
-  agent { label 'test' } 
+    agent { label 'test' }
 
-  stages {
-    stage('Checkout') {
-      steps {
-        checkout scm
-      }
+    environment {
+        NODEJS = 'NodeJS 18'
     }
 
-    stage('Install') {
-      steps {
-        nodejs(nodeJSInstallationName: 'NodeJS 18') {
-          sh 'npm ci'
+    stages {
+        stage('Setup') {
+            steps {
+                nodejs(NODEJS) {
+                    sh 'node -v'
+                    sh 'npm -v'
+                    sh 'npm install'
+                }
+            }
         }
-      }
-    }
 
-    stage('Test') {
-      steps {
-        nodejs(nodeJSInstallationName: 'NodeJS 18') {
-          sh 'npm run test'
+        stage('Build') {
+            steps {
+                nodejs(NODEJS) {
+                    sh 'npm run build'
+                }
+            }
         }
-      }
-    }
 
-    stage('Build') {
-      steps {
-        nodejs(nodeJSInstallationName: 'NodeJS 18') {
-          sh 'npm run build'
+        stage('Test') {
+            steps {
+                nodejs(NODEJS) {
+                    sh 'npm run test'
+                }
+            }
         }
-      }
-    }
 
-    stage('Deploy') {
-      steps {
-        echo '🚀 Deploy step here...'
-      }
-    }
-  }
+        stage('Docker Build') {
+            steps {
+                sh 'docker build -t my-nest-app:latest .'
+            }
+        }
 
-  post {
-    success {
-      echo "✅ Build completed successfully!"
+        stage('Deploy') {
+            steps {
+                echo "Deploy to server..."
+                // Ví dụ: sh 'docker-compose up -d'
+            }
+        }
     }
-    failure {
-      echo "❌ Build failed!"
-    }
-  }
 }
