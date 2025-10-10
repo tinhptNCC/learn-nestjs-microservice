@@ -24,12 +24,6 @@ pipeline {
             }
         }
 
-        stage('Docker Build') {
-            steps {
-                sh 'docker build -t my-nest-app:latest .'
-            }
-        }
-
         stage('Deploy') {
             steps {
                 echo "Deploy to server..."
