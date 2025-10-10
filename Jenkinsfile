@@ -1,5 +1,5 @@
 pipeline {
-  agent any
+  agent { label 'test' } 
 
   stages {
     stage('Checkout') {
@@ -10,27 +10,41 @@ pipeline {
 
     stage('Install') {
       steps {
-        sh 'npm ci'
+        nodejs(nodeJSInstallationName: 'NodeJS 18') {
+          sh 'npm ci'
+        }
       }
     }
 
     stage('Test') {
       steps {
-        sh 'npm run test'
+        nodejs(nodeJSInstallationName: 'NodeJS 18') {
+          sh 'npm run test'
+        }
       }
     }
 
     stage('Build') {
       steps {
-        sh 'npm run build'
+        nodejs(nodeJSInstallationName: 'NodeJS 18') {
+          sh 'npm run build'
+        }
       }
     }
 
     stage('Deploy') {
       steps {
-        echo 'Deploying...'
-        // Deploy code here
+        echo '🚀 Deploy step here...'
       }
+    }
+  }
+
+  post {
+    success {
+      echo "✅ Build completed successfully!"
+    }
+    failure {
+      echo "❌ Build failed!"
     }
   }
 }
